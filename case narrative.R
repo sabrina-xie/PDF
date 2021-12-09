@@ -1,4 +1,13 @@
-setwd("~/OneDrive - New York State Office of Information Technology Services/Rscripts/PDF.scrape")
+setwd("~/OneDrive - New York State Office of Information Technology Services/Rscripts/PDF")
+
+###############CASE NARRATIVE##################
+# GENERATES 1 DATAFRAME OF ALL THE CASE NARRATIVES FROM THE SUMMARY DOCS
+# INCLUDES SAMPLE NAME, SAMPLE RECEIPT, METALS AND GENERAL CHEMISTRY
+# WRITES TO CSV 
+#
+# Required packages: pdftools, stringr
+#
+# -Sabrina Xie
 
 #list all files in directory with "summary" in the name
 list <- list.files("~/New York State Office of Information Technology Services/BWAM - lci", pattern = "*Summary*")
@@ -10,53 +19,46 @@ df.full <- data.frame("Sample.name" = as.character(),
 
 for(j in 1:length(list)){ #run on each summary file
   
-  library(pdftools)
-  
-  pdf.file <- paste("~/New York State Office of Information Technology Services/BWAM - lci",list[j],sep="/") #creat full filename
-  pdf.text <- pdf_text(pdf.file) #convert to text
+  pdf.file <- paste("~/New York State Office of Information Technology Services/BWAM - lci",list[j],sep="/") #create full filename
+  pdf.text <- pdftools::pdf_text(pdf.file) #convert to text
   sample.name <- substr(list[j],1,8)
   
   pdf.text.str<-unlist(pdf.text) #unlist text
 
-  library(stringr)
-  
-  res <- data.frame(str_detect(pdf.text.str,"CASE NARRATIVE")) #find page
+  res <- data.frame(stringr::str_detect(pdf.text.str,"CASE NARRATIVE")) #find page
   page <- as.numeric(row.names(subset(res,res[,1]==TRUE))) #save page number
   
   pdf.text.page <- strsplit(pdf.text[[page]], "\n") #split string by new lines
-  pdf.text.page <- head(pdf.text.page)
-  
+
   df <- data.frame(matrix(unlist(pdf.text.page))) #create dataframe with each line of text as a row
   
   for(i in 1:nrow(df)){ #find paragraph on sample receipt
-    check <- str_detect(df[i,],"Sample Receipt\\:")
+    check <- stringr::str_detect(df[i,],"Sample Receipt\\:")
     if(check=="TRUE"){
       sample.receipt.row <- i
     }else{}
   }
   
   for(i in 1:nrow(df)){ #find paragraph on metals
-    check <- str_detect(df[i,],"Metals\\:")
+    check <- stringr::str_detect(df[i,],"Metals\\:")
     if(check=="TRUE"){
       metals.row <- i
     }else{}
   }
   
   for(i in 1:nrow(df)){ #find paragraph on gen chem
-    check <- str_detect(df[i,],"General Chemistry\\:")
+    check <- stringr::str_detect(df[i,],"General Chemistry\\:")
     if(check=="TRUE"){
       gen.chem.row <- i
     }else{}
   }
   
   for(i in 1:nrow(df)){ #find last row of text
-    check <- str_detect(df[i,],"\\.")
+    check <- stringr::str_detect(df[i,],"\\.")
     if(check=="TRUE"){
       end.row <- i
     }else{}
   }
-  
-  library(tidyverse)
   
   df.receipt <- data.frame(df[(sample.receipt.row+1):(metals.row-1),]) #subset dataframe to sample receipt section
   df.metals <- data.frame(df[(metals.row+1):(gen.chem.row-1),]) #subset dataframe to metals section

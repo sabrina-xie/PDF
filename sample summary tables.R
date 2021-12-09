@@ -1,37 +1,41 @@
-setwd("~/OneDrive - New York State Office of Information Technology Services/Rscripts/PDF.scrape")
+setwd("~/OneDrive - New York State Office of Information Technology Services/Rscripts/PDF")
+
+###############SAMPLE SUMMARY TABLES##################
+# GENERATES DATAFRAME FROM THE SAMPLE SUMMARY TABLE FOR EACH PDF
+# INCLUDES SAMPLE NAME, LAKEID, DATE AND TIME
+# WRITES TO CSV FOR EACH TABLE
+#
+# Required packages: pdftools, stringr
+#
+# -Sabrina Xie
 
 #list all files in directory with "summary" in the name
 list <- list.files("~/New York State Office of Information Technology Services/BWAM - lci", pattern = "*Summary*\\.pdf")
 
 for(j in 1:length(list)){ #run on each summary file
   
-  library(pdftools)
-  
   pdf.file <- paste("~/New York State Office of Information Technology Services/BWAM - lci",list[j],sep="/") #creat full filename
-  pdf.text <- pdf_text(pdf.file) #convert to text
+  pdf.text <- pdftools::pdf_text(pdf.file) #convert to text
   
   pdf.text.str<-unlist(pdf.text) #unlist text
   pdf.text.str<-tolower(pdf.text) #to lower case for search
   
-  library(stringr)
-  
-  res <- data.frame(str_detect(pdf.text.str,"sample cross-reference")) #find page with sample name table
+  res <- data.frame(stringr::str_detect(pdf.text.str,"sample cross-reference")) #find page with sample name table
   page <- as.numeric(row.names(subset(res,res[,1]==TRUE))) #save page number
   
   pdf.text.page <- strsplit(pdf.text[[page]], "\n") #split string by new lines
-  pdf.text.page <- head(pdf.text.page)
-  
+
   df <- data.frame(matrix(unlist(pdf.text.page))) #create dataframe with each line of text as a row
   
   for(i in 1:nrow(df)){ #find row where table starts
-    check <- str_detect(df[i,],"CLIENT SAMPLE ID")
+    check <- stringr::str_detect(df[i,],"CLIENT SAMPLE ID")
     if(check=="TRUE"){
       header.row <- i
     }else{}
   }
   
   for(i in 1:nrow(df)){ #find last row of table
-    check <- str_detect(df[i,],"21L")
+    check <- stringr::str_detect(df[i,],"21L")
     if(check=="TRUE"){
       end.row <- i
     }else{}
