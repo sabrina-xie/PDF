@@ -32,33 +32,10 @@ for(j in 1:length(list)){ #run on each summary file
 
   df <- data.frame(matrix(unlist(pdf.text.page))) #create dataframe with each line of text as a row
   
-  for(i in 1:nrow(df)){ #find paragraph on sample receipt
-    check <- stringr::str_detect(df[i,],"Sample Receipt\\:")
-    if(check=="TRUE"){
-      sample.receipt.row <- i
-    }else{}
-  }
-  
-  for(i in 1:nrow(df)){ #find paragraph on metals
-    check <- stringr::str_detect(df[i,],"Metals\\:")
-    if(check=="TRUE"){
-      metals.row <- i
-    }else{}
-  }
-  
-  for(i in 1:nrow(df)){ #find paragraph on gen chem
-    check <- stringr::str_detect(df[i,],"General Chemistry\\:")
-    if(check=="TRUE"){
-      gen.chem.row <- i
-    }else{}
-  }
-  
-  for(i in 1:nrow(df)){ #find last row of text
-    check <- stringr::str_detect(df[i,],"\\.")
-    if(check=="TRUE"){
-      end.row <- i
-    }else{}
-  }
+  sample.receipt.row <- which(str_detect(df[,1],"Sample Receipt\\:")) #find paragraph on sample receipt
+  metals.row <- which(str_detect(df[,1],"Metals\\:")) #find paragraph on metals
+  gen.chem.row <- which(str_detect(df[,1],"General Chemistry\\:")) #find paragraph on gen chem
+  end.row <- max(which(str_detect(df[,1],"\\."))) #find last row
   
   df.receipt <- data.frame(df[(sample.receipt.row+1):(metals.row-1),]) #subset dataframe to sample receipt section
   df.metals <- data.frame(df[(metals.row+1):(gen.chem.row-1),]) #subset dataframe to metals section
