@@ -27,19 +27,9 @@ for(j in 1:length(list)){ #run on each summary file
 
   df <- data.frame(matrix(unlist(pdf.text.page))) #create dataframe with each line of text as a row
   
-  for(i in 1:nrow(df)){ #find row where table starts
-    check <- stringr::str_detect(df[i,],"CLIENT SAMPLE ID")
-    if(check=="TRUE"){
-      header.row <- i
-    }else{}
-  }
+  header.row <- stringr::str_detect(df,"CLIENT SAMPLE ID")
   
-  for(i in 1:nrow(df)){ #find last row of table
-    check <- stringr::str_detect(df[i,],"21L")
-    if(check=="TRUE"){
-      end.row <- i
-    }else{}
-  }
+  end.row <- stringr::str_detect(df,"21L")
   
   df <- data.frame(df[(header.row+1):end.row,]) #subset dataframe to rows with the table
   
